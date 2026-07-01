@@ -455,12 +455,12 @@ def index():
     merged = request.args.get("merged")
     inbound = load_inbound()
     outbound = load_outbound()
-    total_qty = sum(int(r.get("NO OF UNIT", 0)) for r in inbound)
+    total_qty = sum(safe_int(r.get("NO OF UNIT", 0)) for r in inbound)
     unique_persons = len(set(r.get("EMPLOYEE NAME", "") for r in outbound if r.get("EMPLOYEE NAME", "").strip()))
     product_counts = {}
     for row in outbound:
         p = row.get("PRODUCT", "").strip().lower()
-        q = int(row.get("QUANTITY", 0))
+        q = safe_int(row.get("QUANTITY", 0))
         product_counts[p] = product_counts.get(p, 0) + q
     pc_count = product_counts.get("pc", 0)
     keyboard_count = product_counts.get("keyboard", 0)
@@ -468,7 +468,7 @@ def index():
     dept_qty = {}
     for row in outbound:
         d = row.get("DEPARTMENT", "").strip().upper()
-        q = int(row.get("QUANTITY", 0))
+        q = safe_int(row.get("QUANTITY", 0))
         if d and d != "IT":
             dept_qty[d] = dept_qty.get(d, 0) + q
     dept_items = sorted(dept_qty.items())
@@ -501,7 +501,7 @@ def add_inbound():
     for existing in rows:
         if (existing.get("PRODUCT", "") == row["PRODUCT"] and
             existing.get("SPECIFICATION", "") == row["SPECIFICATION"]):
-            existing["NO OF UNIT"] = str(int(existing.get("NO OF UNIT", 0)) + int(row["NO OF UNIT"]))
+            existing["NO OF UNIT"] = str(safe_int(existing.get("NO OF UNIT", 0)) + safe_int(row["NO OF UNIT"]))
             existing["DATE"] = row["DATE"]
             merged = True
             break
@@ -580,6 +580,12 @@ def update_entry(typ, idx):
 def normalize_col(name):
     return " ".join(name.strip().upper().split())
 
+def safe_int(val, default=0):
+    try:
+        return int(val)
+    except (ValueError, TypeError):
+        return default
+
 def col_match(name, target):
     return normalize_col(name) == normalize_col(target)
 
@@ -636,7 +642,7 @@ def import_excel(typ):
             for er in existing:
                 if (er.get("PRODUCT", "") == mapped.get("PRODUCT", "") and
                     er.get("SPECIFICATION", "") == mapped.get("SPECIFICATION", "")):
-                    er["NO OF UNIT"] = str(int(er.get("NO OF UNIT", 0)) + int(mapped.get("NO OF UNIT", 1)))
+                    er["NO OF UNIT"] = str(safe_int(er.get("NO OF UNIT", 0)) + safe_int(mapped.get("NO OF UNIT", 1)))
                     er["DATE"] = today
                     merged = True
                     break

@@ -761,4 +761,4 @@ def export_pdf():
     return send_file(buf, mimetype="application/pdf", as_attachment=True, download_name=f"inventory_{datetime.now().strftime('%Y%m%d')}.pdf")
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5003, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

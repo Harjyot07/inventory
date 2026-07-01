@@ -1,1 +1,3 @@
 Flask
+openpyx1
+fpdf2

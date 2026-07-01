@@ -427,17 +427,10 @@ h1{font-size:22px;font-weight:700;color:#f1f5f9;margin-bottom:4px}
 <form method="POST" action="/update/{{ typ }}/{{ idx }}">
 <div class="form-grid">
 {% for field in fields %}
-{% if field != "DATE" %}
 <div class="form-group">
 <label for="f_{{ field }}">{{ field }}</label>
 <input type="text" id="f_{{ field }}" name="{{ field }}" value="{{ row[field] }}" required>
 </div>
-{% else %}
-<div class="form-group">
-<label>{{ field }}</label>
-<div style="padding:10px 14px;border:1px solid #334155;border-radius:8px;background:#0f172a;color:#94a3b8;font-size:14px">{{ row[field] }}</div>
-</div>
-{% endif %}
 {% endfor %}
 </div>
 <div class="actions">
@@ -567,9 +560,7 @@ def update_entry(typ, idx):
         return redirect("/")
     if idx < 0 or idx >= len(rows):
         return redirect("/")
-    today = datetime.now().strftime("%Y-%m-%d")
     row = {h: request.form.get(h, rows[idx].get(h, "")) for h in headers}
-    row["DATE"] = rows[idx].get("DATE", today)
     rows[idx] = row
     if typ == "inbound":
         save_inbound(rows)
